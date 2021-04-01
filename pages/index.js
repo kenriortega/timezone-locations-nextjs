@@ -1,65 +1,60 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { Footer } from '../components/Footer'
+import SchemeColorSwitcher from '../components/SchemeColorSwitcher'
+import { TimeZoneSearch } from '../components/TimeZone/Search'
+import TimeZoneCard from '../components/TimeZone/Card'
+import MapBox from '../components/Ipinfo/MapBox'
+import { useState } from "react";
 
 export default function Home() {
+
+
+  const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const [timeZones, setTimeZones] = useState([currentTimeZone])
+  const [location, setLocation] = useState(null)
+
+  const handleAddTZ = (timeZone = "") => {
+    setTimeZones(timeZones => timeZones.concat(timeZone))
+  }
+  const handleRemoveTZ = (timeZone = "") => {
+    setTimeZones(
+      timeZones => timeZones
+        .filter(_timeZone => _timeZone !== timeZone)
+    )
+  }
+  const handleFindIPInfo = (_location) => {
+    setLocation(_location.split("/")[1])
+  }
+
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+    <div>
+      <header className="header-timezone">
+        <h1 className="title">TimeZone Dashboard</h1>
+        <h3 className="text">Total TimeZones #{timeZones.length}</h3>
+        <TimeZoneSearch onSelect={handleAddTZ} />
+      </header>
+      <main className="main-timezone">
+        <div className="main-title">
+          <SchemeColorSwitcher />
         </div>
-      </main>
+        <section className="card-section">
+          {timeZones.map(timeZone => (
+            <TimeZoneCard
+              key={timeZone}
+              timeZone={timeZone}
+              onClose={handleRemoveTZ}
+              onSelectLocation={handleFindIPInfo} />
+          ))}
+        </section>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+        {timeZones.length !== 0 &&
+          <section>
+            {location !== null && <MapBox location={location} />}
+          </section>
+        }
+
+      </main>
+      <Footer />
     </div>
   )
 }
